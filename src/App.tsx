@@ -15,7 +15,13 @@ function App() {
   const [selectedThreat, setSelectedThreat] = useState<ThreatLog | null>(null);
   const [activeTab, setActiveTab] = useState<'threats' | 'blocked'>('threats');
 
+  // Debug info
+  console.log('🚀 App component rendered');
+  console.log('Loading state:', loading);
+  console.log('Stats:', stats);
+
   if (loading) {
+    console.log('⏳ Showing loading screen');
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
         <div className="text-white text-xl">Loading security dashboard...</div>
@@ -23,6 +29,7 @@ function App() {
     );
   }
 
+  console.log('✅ Showing main dashboard');
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       <header className="bg-slate-800 border-b border-slate-700 shadow-lg">
