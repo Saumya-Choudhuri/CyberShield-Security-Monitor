@@ -14,9 +14,15 @@ export function useSecurityData() {
   const [loading, setLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
+    console.log('🔍 Fetching security data...');
+    console.log('Supabase URL:', import.meta.env.VITE_SUPABASE_URL);
+    console.log('Supabase Key exists:', !!import.meta.env.VITE_SUPABASE_ANON_KEY);
+
     try {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
+
+      console.log('📊 Making Supabase queries...');
 
       const [threatsRes, blockedRes, todayThreatsRes, criticalRes] = await Promise.all([
         supabase.from('threat_logs').select('*', { count: 'exact', head: true }),
@@ -24,6 +30,13 @@ export function useSecurityData() {
         supabase.from('threat_logs').select('*', { count: 'exact', head: true }).gte('created_at', today.toISOString()),
         supabase.from('threat_logs').select('*', { count: 'exact', head: true }).eq('severity', 'critical'),
       ]);
+
+      console.log('✅ Query results:', {
+        totalThreats: threatsRes.count,
+        blockedIPs: blockedRes.count,
+        threatsToday: todayThreatsRes.count,
+        criticalThreats: criticalRes.count
+      });
 
       setStats({
         totalThreats: threatsRes.count || 0,
@@ -43,11 +56,27 @@ export function useSecurityData() {
         .select('*')
         .order('blocked_at', { ascending: false });
 
+      console.log('📋 Fetched data:', {
+        threatsCount: threats?.length || 0,
+        blockedCount: blocked?.length || 0
+      });
+
       setRecentThreats(threats || []);
       setBlockedIPs(blocked || []);
+      console.log('✅ Data fetch complete');
     } catch (error) {
-      console.error('Error fetching security data:', error);
+      console.error('❌ Error fetching security data:', error);
+      // Set some default data so the app doesn't stay blank
+      setStats({
+        totalThreats: 0,
+        blockedIPs: 0,
+        threatsToday: 0,
+        criticalThreats: 0,
+      });
+      setRecentThreats([]);
+      setBlockedIPs([]);
     } finally {
+      console.log('🏁 Setting loading to false');
       setLoading(false);
     }
   }, []);
