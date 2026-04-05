@@ -21,6 +21,13 @@ export function PrivacySettings({ onClose }: PrivacySettingsProps) {
     setMessage(null);
 
     try {
+      // First, get the user's actual IP from their browser
+      const ipResponse = await fetch('https://api.ipify.org?format=json');
+      const ipData = await ipResponse.json();
+      const userIp = ipData.ip;
+
+      console.log('🗑️ User IP detected:', userIp);
+
       const deleteUrl =
         import.meta.env.VITE_SUPABASE_URL +
         '/functions/v1/delete-user-data';
@@ -33,6 +40,7 @@ export function PrivacySettings({ onClose }: PrivacySettingsProps) {
         },
         body: JSON.stringify({
           confirm_deletion: true,
+          user_ip: userIp, // Send user's actual IP
         }),
       });
 
@@ -40,7 +48,7 @@ export function PrivacySettings({ onClose }: PrivacySettingsProps) {
 
       if (response.ok) {
         setMessage(
-          '✅ All your data has been permanently deleted. Your IP address and all activities have been removed.'
+          `✅ All your data has been permanently deleted. Your IP address (${userIp}) and all activities have been removed.`
         );
         setMessageType('success');
         setShowConfirm(false);
@@ -54,6 +62,7 @@ export function PrivacySettings({ onClose }: PrivacySettingsProps) {
         setMessageType('error');
       }
     } catch (error) {
+      console.error('Error:', error);
       setMessage('Error deleting data. Please try again.');
       setMessageType('error');
     } finally {
