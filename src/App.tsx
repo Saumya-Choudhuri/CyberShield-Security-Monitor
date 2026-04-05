@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Shield, Activity, Lock, TrendingUp } from 'lucide-react';
+import { Shield, Activity, Lock, TrendingUp, Settings } from 'lucide-react';
 import { useSecurityData } from './hooks/useSecurityData';
 import { StatCard } from './components/StatCard';
 import { ThreatLogTable } from './components/ThreatLogTable';
@@ -7,6 +7,7 @@ import { BlockedIPsTable } from './components/BlockedIPsTable';
 import { ActivityTimeline } from './components/ActivityTimeline';
 import { ReportGenerator } from './components/ReportGenerator';
 import { ThreatDetailsModal } from './components/ThreatDetailsModal';
+import { PrivacySettings } from './components/PrivacySettings';
 import { ThreatLog } from './types/security';
 import { AuthPortal } from './components/AuthPortal';
 
@@ -14,6 +15,7 @@ function App() {
   const { stats, recentThreats, blockedIPs, loading, refetch } = useSecurityData();
   const [selectedThreat, setSelectedThreat] = useState<ThreatLog | null>(null);
   const [activeTab, setActiveTab] = useState<'threats' | 'blocked'>('threats');
+  const [showPrivacySettings, setShowPrivacySettings] = useState(false);
 
   // Debug info
   console.log('🚀 App component rendered');
@@ -34,12 +36,22 @@ function App() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       <header className="bg-slate-800 border-b border-slate-700 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center">
-            <Shield size={40} className="text-blue-500 mr-3" />
-            <div>
-              <h1 className="text-3xl font-bold text-white">CyberShield Security Monitor</h1>
-              <p className="text-gray-400 mt-1">Real-time threat detection and automated protection</p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <Shield size={40} className="text-blue-500 mr-3" />
+              <div>
+                <h1 className="text-3xl font-bold text-white">CyberShield Security Monitor</h1>
+                <p className="text-gray-400 mt-1">Real-time threat detection and automated protection</p>
+              </div>
             </div>
+            <button
+              onClick={() => setShowPrivacySettings(true)}
+              className="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2 px-4 rounded transition-colors"
+              title="Privacy Settings - Delete all your data"
+            >
+              <Settings size={20} />
+              <span className="hidden sm:inline">Privacy</span>
+            </button>
           </div>
         </div>
       </header>
@@ -115,6 +127,10 @@ function App() {
       </main>
 
       <ThreatDetailsModal threat={selectedThreat} onClose={() => setSelectedThreat(null)} />
+      
+      {showPrivacySettings && (
+        <PrivacySettings onClose={() => setShowPrivacySettings(false)} />
+      )}
 
       <footer className="bg-slate-800 border-t border-slate-700 mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">

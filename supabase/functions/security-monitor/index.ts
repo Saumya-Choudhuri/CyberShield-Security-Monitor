@@ -98,6 +98,7 @@ Deno.serve(async (req: Request) => {
     }
 
     if (authContext?.event === 'login' && authContext.status === 'precheck') {
+      console.log('🔐 Precheck - IP:', clientIp);
       return new Response(
         JSON.stringify({ blocked: false, threats: [], ip: clientIp }),
         {
@@ -137,7 +138,12 @@ Deno.serve(async (req: Request) => {
       .gte('created_at', new Date(Date.now() - 60000).toISOString());
 
     let loginFailureCount = 0;
+    let isLoginFailure = false;
+    
     if (authContext?.event === 'login' && authContext.status === 'failure') {
+      isLoginFailure = true;
+      console.log('❌ Login failure detected for IP:', clientIp, 'User:', authContext.identifier);
+      
       const { count: recentLoginFailures } = await supabase
         .from('threat_logs')
         .select('id', { count: 'exact', head: true })
@@ -151,8 +157,10 @@ Deno.serve(async (req: Request) => {
       threats.push({
         type: 'Failed Login Attempt',
         severity,
-        reason: `${loginFailureCount} failed login attempts within ${FAILED_LOGIN_WINDOW_MINUTES} minutes`,
+        reason: `${loginFailureCount} failed login attempts within ${FAILED_LOGIN_WINDOW_MINUTES} minutes. User: ${authContext.identifier}`,
       });
+      
+      console.log('📊 Login failure count:', loginFailureCount, '- Severity:', severity);
     }
 
     if ((count || 0) > 50) {
@@ -168,19 +176,29 @@ Deno.serve(async (req: Request) => {
       t.severity === 'critical' || t.severity === 'high'
     ) || (count || 0) > 100;
 
-    if (threats.length > 0) {
-      await supabase.from('threat_logs').insert({
+    // ALWAYS log failed logins, even if no other threats
+    if (threats.length > 0 || isLoginFailure) {
+      console.log('💾 Logging threat - IP:', clientIp, 'Threats:', threats.length, 'Should block:', shouldBlock);
+      
+      const { error: logError } = await supabase.from('threat_logs').insert({
         ip_address: clientIp,
-        threat_type: threats.map(t => t.type).join(', '),
-        severity: threats[0].severity,
+        threat_type: threats.map(t => t.type).join(', ') || 'Failed Login Attempt',
+        severity: threats[0]?.severity || 'medium',
         request_path: url,
         request_method: method,
         user_agent: headerUserAgent,
         payload: { headers, body, queryParams, authContext, threats },
         blocked: shouldBlock,
       });
+      
+      if (logError) {
+        console.error('❌ Error logging threat:', logError);
+      } else {
+        console.log('✅ Threat logged successfully');
+      }
 
       if (shouldBlock) {
+        console.log('🚫 Blocking IP:', clientIp);
         const { data: existingBlock } = await supabase
           .from('blocked_ips')
           .select('*')
@@ -192,13 +210,13 @@ Deno.serve(async (req: Request) => {
             .from('blocked_ips')
             .update({ 
               threat_count: existingBlock.threat_count + 1,
-              reason: `${existingBlock.reason}; ${threats[0].type}`,
+              reason: `${existingBlock.reason}; ${threats[0]?.type || 'Failed Login'}`,
             })
             .eq('id', existingBlock.id);
         } else {
           await supabase.from('blocked_ips').insert({
             ip_address: clientIp,
-            reason: threats.map(t => t.type).join(', '),
+            reason: threats.map(t => t.type).join(', ') || 'Failed Login Attempt',
             threat_count: 1,
             status: 'blocked',
             metadata: { threats },
