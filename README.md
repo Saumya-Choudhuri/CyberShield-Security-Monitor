@@ -179,5 +179,5 @@ To run from source:
 
 ```sh
 # Go >= 1.22
-go run . help
+go run . help 
 ```
