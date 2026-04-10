@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { monitoredSignIn, reportAuthAttempt } from '../lib/securityMonitorClient';
 import { performEnhancedSecurityCheck } from '../lib/enhancedSecurityMonitor';
 import { supabase } from '../lib/supabase';
@@ -20,10 +20,41 @@ export function AuthPortal() {
   const [variant, setVariant] = useState<'success' | 'error' | null>(null);
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
 
+  // Load AI analysis from localStorage on mount
+  useEffect(() => {
+    const savedAnalysis = localStorage.getItem('lastAIAnalysis');
+    if (savedAnalysis) {
+      setAiAnalysis(savedAnalysis);
+    }
+  }, []);
+
+  // Save AI analysis to localStorage whenever it changes
+  useEffect(() => {
+    if (aiAnalysis) {
+      localStorage.setItem('lastAIAnalysis', aiAnalysis);
+    }
+  }, [aiAnalysis]);
+
+  // Auto-clear AI analysis after 5 minutes
+  useEffect(() => {
+    if (!aiAnalysis) return;
+
+    const timeout = setTimeout(() => {
+      clearAIAnalysis();
+    }, 5 * 60 * 1000); // 5 minutes
+
+    return () => clearTimeout(timeout);
+  }, [aiAnalysis]);
+
   const resetState = () => {
     setPassword('');
     setConfirmPassword('');
     setLoading(false);
+  };
+
+  const clearAIAnalysis = () => {
+    localStorage.removeItem('lastAIAnalysis');
+    setAiAnalysis(null);
   };
 
   const showMessage = (text: string, type: 'success' | 'error') => {
@@ -52,9 +83,8 @@ export function AuthPortal() {
         },
       });
 
-      setAiAnalysis(
-        `AI Threat Analysis: ${securityCheck.riskLevel.toUpperCase()} (Risk Score: ${securityCheck.aiAnalysis.riskScore}%)`,
-      );
+      const analysisMessage = `AI Threat Analysis: ${securityCheck.riskLevel.toUpperCase()} (Risk Score: ${securityCheck.aiAnalysis.riskScore}%)`;
+      setAiAnalysis(analysisMessage);
 
       // Check if AI recommends blocking
       if (securityCheck.shouldBlock) {
@@ -74,6 +104,7 @@ export function AuthPortal() {
       }
 
       showMessage('Login successful—session created.', 'success');
+      clearAIAnalysis(); // Clear AI analysis on successful login
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Login blocked by CyberShield.';
       showMessage(message, 'error');
@@ -134,6 +165,7 @@ export function AuthPortal() {
             setActiveTab(tab);
             setMessage(null);
             setVariant(null);
+            clearAIAnalysis(); // Clear AI analysis when switching tabs
           }}
           type="button"
         >
@@ -214,8 +246,17 @@ export function AuthPortal() {
         )}
 
         {aiAnalysis && (
-          <div className="rounded-lg px-4 py-2 text-sm bg-blue-500/10 text-blue-300 border border-blue-500/30">
-            <span className="font-semibold">🤖 AI Security Check:</span> {aiAnalysis}
+          <div className="rounded-lg px-4 py-2 text-sm bg-blue-500/10 text-blue-300 border border-blue-500/30 flex items-center justify-between">
+            <span>
+              <span className="font-semibold">🤖 AI Security Check:</span> {aiAnalysis}
+            </span>
+            <button
+              type="button"
+              onClick={clearAIAnalysis}
+              className="ml-2 text-blue-400 hover:text-blue-200 font-semibold text-xs"
+            >
+              ✕
+            </button>
           </div>
         )}
 
