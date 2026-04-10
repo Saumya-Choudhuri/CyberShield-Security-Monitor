@@ -48,3 +48,12 @@ export interface DashboardStats {
   threatsToday: number;
   criticalThreats: number;
 }
+
+export interface AIThreatAnalysis {
+  riskScore: number; // 0-100
+  threatLevel: 'low' | 'medium' | 'high' | 'critical';
+  recommendation: 'allow' | 'warn' | 'require_2fa' | 'block';
+  analysis: string;
+  detectedThreats: string[];
+  analyzedAt: string;
+}

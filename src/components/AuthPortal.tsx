@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { monitoredSignIn, reportAuthAttempt } from '../lib/securityMonitorClient';
+import { performEnhancedSecurityCheck } from '../lib/enhancedSecurityMonitor';
 import { supabase } from '../lib/supabase';
 
 type TabKey = 'login' | 'signup';
@@ -17,6 +18,7 @@ export function AuthPortal() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [variant, setVariant] = useState<'success' | 'error' | null>(null);
+  const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
 
   const resetState = () => {
     setPassword('');
@@ -31,6 +33,39 @@ export function AuthPortal() {
 
   const handleLogin = async () => {
     try {
+      // Get device info for AI analysis
+      const userAgent = navigator.userAgent;
+      const ip = await fetch('https://api.ipify.org?format=json')
+        .then((res) => res.json())
+        .then((data) => data.ip)
+        .catch(() => 'unknown');
+
+      // Perform AI-enhanced security check
+      const securityCheck = await performEnhancedSecurityCheck({
+        email,
+        ipAddress: ip,
+        failedAttempts: 0, // Would be tracked in real app
+        deviceInfo: {
+          userAgent,
+          browser: 'unknown',
+          os: 'unknown',
+        },
+      });
+
+      setAiAnalysis(
+        `AI Threat Analysis: ${securityCheck.riskLevel.toUpperCase()} (Risk Score: ${securityCheck.aiAnalysis.riskScore}%)`,
+      );
+
+      // Check if AI recommends blocking
+      if (securityCheck.shouldBlock) {
+        showMessage(
+          `Login blocked: ${securityCheck.message}`,
+          'error',
+        );
+        return;
+      }
+
+      // Proceed with regular login if AI cleared it
       const result = await monitoredSignIn(supabase, { email, password });
 
       if (result.error) {
@@ -175,6 +210,12 @@ export function AuthPortal() {
             }`}
           >
             {message}
+          </div>
+        )}
+
+        {aiAnalysis && (
+          <div className="rounded-lg px-4 py-2 text-sm bg-blue-500/10 text-blue-300 border border-blue-500/30">
+            <span className="font-semibold">🤖 AI Security Check:</span> {aiAnalysis}
           </div>
         )}
 
