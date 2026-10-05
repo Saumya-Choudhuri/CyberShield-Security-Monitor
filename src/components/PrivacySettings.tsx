@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { AlertTriangle, Trash2 } from 'lucide-react';
+import { ShieldAlert, Trash2 } from 'lucide-react';
 
 interface PrivacySettingsProps {
   onClose: () => void;
@@ -85,32 +85,18 @@ export function PrivacySettings({ onClose, onDeleted, demoMode = false }: Privac
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-slate-800 rounded-lg p-8 max-w-md w-full mx-4">
         <div className="flex items-center gap-3 mb-6">
-          <AlertTriangle className="w-6 h-6 text-red-500" />
-          <h2 className="text-2xl font-bold text-white">Privacy Settings</h2>
+          <ShieldAlert className="w-6 h-6 text-cyan-300" />
+          <h2 className="text-2xl font-bold text-white">Privacy</h2>
         </div>
 
-        <div className="bg-slate-700 rounded-lg p-4 mb-6">
-          <h3 className="text-lg font-semibold text-white mb-3">
-            🗑️ Delete All My Data
-          </h3>
-          <p className="text-gray-300 text-sm mb-4">
-            Permanently delete all your activities, threat logs, and blocked IP status from our system.
-          </p>
-          <p className="text-red-400 text-xs mb-4">
-            ⚠️ <strong>WARNING:</strong> This action cannot be undone!
-          </p>
-
-          <div className="bg-slate-600 rounded p-3 mb-4">
-            <p className="text-gray-300 text-xs">
-              <strong>This will delete:</strong>
-            </p>
-            <ul className="text-gray-400 text-xs mt-2 space-y-1">
-              <li>✓ All threat logs associated with your IP</li>
-              <li>✓ Your blocked IP status (if any)</li>
-              <li>✓ All activity records</li>
-              <li>✓ Security event history</li>
-            </ul>
-          </div>
+        <div className="rounded-lg border border-slate-700 bg-slate-700/70 p-4 mb-6">
+          <p className="text-gray-200 text-sm">Delete the activity connected to your IP address.</p>
+          <ul className="mt-3 space-y-1 text-xs text-gray-400">
+            <li>Threat logs and activity history</li>
+            <li>Blocked IP records</li>
+            <li>Admin actions connected to your IP</li>
+          </ul>
+          <p className="mt-4 text-xs text-red-300">This cannot be undone.</p>
 
           {message && (
             <div
@@ -130,12 +116,12 @@ export function PrivacySettings({ onClose, onDeleted, demoMode = false }: Privac
               className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded transition-colors flex items-center justify-center gap-2"
             >
               <Trash2 className="w-4 h-4" />
-              Delete All My Data
+              Delete my data
             </button>
           ) : (
             <div className="space-y-2">
               <p className="text-red-300 text-sm font-semibold">
-                Are you absolutely sure? This cannot be undone!
+                Delete your data now?
               </p>
               <div className="flex gap-2">
                 <button
@@ -149,7 +135,7 @@ export function PrivacySettings({ onClose, onDeleted, demoMode = false }: Privac
                   disabled={isDeleting}
                   className="flex-1 bg-red-700 hover:bg-red-800 disabled:bg-red-900 text-white font-semibold py-2 px-4 rounded transition-colors"
                 >
-                  {isDeleting ? 'Deleting...' : 'Yes, Delete Forever'}
+                  {isDeleting ? 'Deleting...' : 'Yes, delete it'}
                 </button>
               </div>
             </div>
@@ -164,7 +150,7 @@ export function PrivacySettings({ onClose, onDeleted, demoMode = false }: Privac
         </button>
 
         <p className="text-gray-400 text-xs mt-4 text-center">
-          💡 After deletion, you can safely use CyberShield without any previous activity history.
+          You can continue using the demo after deletion.
         </p>
       </div>
     </div>
