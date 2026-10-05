@@ -3,9 +3,10 @@ import { AlertTriangle, Trash2 } from 'lucide-react';
 
 interface PrivacySettingsProps {
   onClose: () => void;
+  onDeleted: () => void;
 }
 
-export function PrivacySettings({ onClose }: PrivacySettingsProps) {
+export function PrivacySettings({ onClose, onDeleted }: PrivacySettingsProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -52,6 +53,7 @@ export function PrivacySettings({ onClose }: PrivacySettingsProps) {
         );
         setMessageType('success');
         setShowConfirm(false);
+        onDeleted();
         
         // Close modal after success
         setTimeout(() => {

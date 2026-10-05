@@ -31,8 +31,11 @@ Deno.serve(async (req: Request) => {
     console.log('🗑️ Data deletion request from IP:', clientIp);
 
     if (req.method === 'POST') {
-      const supabaseUrl = Deno.env.get('SUPA_URL')!;
-      const supabaseKey = Deno.env.get('SERVICE_ROLE_KEY')!;
+      const supabaseUrl = Deno.env.get('SUPA_URL') || Deno.env.get('SUPABASE_URL');
+      const supabaseKey = Deno.env.get('SERVICE_ROLE_KEY') || Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+      if (!supabaseUrl || !supabaseKey) {
+        throw new Error('Supabase service configuration is missing');
+      }
       const supabase = createClient(supabaseUrl, supabaseKey);
 
       // Verify the request has a confirmation
@@ -54,6 +57,7 @@ Deno.serve(async (req: Request) => {
       // Use IP from frontend if provided, otherwise fall back to header extraction
       let ipToDelete = body.user_ip || clientIp;
       console.log('🗑️ Using IP for deletion:', ipToDelete, '(from:', body.user_ip ? 'frontend' : 'headers', ')');
+      const ipsToDelete = [...new Set([ipToDelete, clientIp].filter(Boolean))];
 
       let deletedCount = 0;
 
@@ -62,7 +66,7 @@ Deno.serve(async (req: Request) => {
       const { data: threat_logs_deleted, error: threat_error } = await supabase
         .from('threat_logs')
         .delete()
-        .eq('ip_address', ipToDelete)
+        .in('ip_address', ipsToDelete)
         .select('id');
 
       if (threat_error) {
@@ -77,11 +81,21 @@ Deno.serve(async (req: Request) => {
       const { data: blocked_ips_deleted, error: blocked_error } = await supabase
         .from('blocked_ips')
         .delete()
-        .eq('ip_address', ipToDelete)
+        .in('ip_address', ipsToDelete)
         .select('id');
 
       if (blocked_error) {
         console.error('❌ Error deleting blocked IP:', blocked_error);
+        return new Response(
+          JSON.stringify({
+            error: 'Blocked IP data could not be deleted',
+            details: blocked_error.message,
+          }),
+          {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        );
       } else {
         deletedCount += blocked_ips_deleted?.length || 0;
         console.log('✅ Deleted blocked_ips:', blocked_ips_deleted?.length || 0);
@@ -92,7 +106,7 @@ Deno.serve(async (req: Request) => {
       const { data: admin_actions_deleted, error: admin_error } = await supabase
         .from('admin_actions')
         .delete()
-        .eq('ip_address', ipToDelete)
+        .in('ip_address', ipsToDelete)
         .select('id');
 
       if (admin_error) {

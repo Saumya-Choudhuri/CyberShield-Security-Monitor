@@ -129,7 +129,10 @@ function App() {
       <ThreatDetailsModal threat={selectedThreat} onClose={() => setSelectedThreat(null)} />
       
       {showPrivacySettings && (
-        <PrivacySettings onClose={() => setShowPrivacySettings(false)} />
+        <PrivacySettings
+          onClose={() => setShowPrivacySettings(false)}
+          onDeleted={refetch}
+        />
       )}
 
       <footer className="bg-slate-800 border-t border-slate-700 mt-12">

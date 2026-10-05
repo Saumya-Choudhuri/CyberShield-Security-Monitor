@@ -45,6 +45,7 @@ npx supabase link --project-ref pfrfeebtiktnfgdeoqvl
 
 # Deploy the security functions
 npx supabase functions deploy security-monitor
+npx supabase functions deploy delete-user-data
 ```
 
 **⏱️ Takes 2-3 minutes**

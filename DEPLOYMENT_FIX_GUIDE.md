@@ -41,6 +41,7 @@ npx supabase link --project-ref pfrfeebtiktnfgdeoqvl
 
 # Deploy functions
 npx supabase functions deploy security-monitor
+npx supabase functions deploy delete-user-data
 ```
 
 ## Step 4: Verify Database Tables Exist
