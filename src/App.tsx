@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Shield, Activity, Lock, TrendingUp, Trash2, LogOut } from 'lucide-react';
+import { Shield, Activity, Lock, TrendingUp, Trash2, LogOut, ShieldCheck } from 'lucide-react';
 import { useSecurityData } from './hooks/useSecurityData';
 import { StatCard } from './components/StatCard';
 import { ThreatLogTable } from './components/ThreatLogTable';
@@ -13,6 +13,7 @@ import { AuthPortal } from './components/AuthPortal';
 
 function App() {
   const [accessMode, setAccessMode] = useState<'locked' | 'demo' | 'live'>('locked');
+  const [showLoginInsight, setShowLoginInsight] = useState(false);
   const isDemoMode = accessMode === 'demo';
   const { stats, recentThreats, blockedIPs, loading, refetch, clearDemoData } = useSecurityData(isDemoMode);
   const [selectedThreat, setSelectedThreat] = useState<ThreatLog | null>(null);
@@ -46,7 +47,10 @@ function App() {
                 <p className="mt-4 max-w-xl text-lg leading-8 text-slate-400">Sign in with your real account to use live security data, or open the workspace directly to explore the fictional public demo.</p>
               </div>
               <AuthPortal
-                onAuthenticated={() => setAccessMode('live')}
+                onAuthenticated={() => {
+                  setAccessMode('live');
+                  setShowLoginInsight(true);
+                }}
                 onBlockedOpenWorkspace={() => setAccessMode('demo')}
               />
             </div>
@@ -203,6 +207,35 @@ function App() {
       </main>
 
       <ThreatDetailsModal threat={selectedThreat} onClose={() => setSelectedThreat(null)} />
+
+      {showLoginInsight && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 px-4">
+          <div className="w-full max-w-md rounded-2xl border border-cyan-300/30 bg-slate-800 p-7 shadow-2xl">
+            <div className="mb-5 flex items-center gap-3">
+              <div className="rounded-xl bg-cyan-300/10 p-3 text-cyan-300">
+                <ShieldCheck size={26} />
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">CyberShield insight</p>
+                <h2 className="text-xl font-bold text-white">Your login is being protected</h2>
+              </div>
+            </div>
+            <p className="text-sm leading-6 text-slate-300">
+              CyberShield detects suspicious login activity, records the event, and blocks an IP after two failed attempts within 15 minutes.
+            </p>
+            <p className="mt-3 text-sm leading-6 text-slate-400">
+              You can review these protections in the Threat Logs section using safe fictional demo records.
+            </p>
+            <button
+              type="button"
+              onClick={() => setShowLoginInsight(false)}
+              className="mt-6 w-full rounded-lg bg-cyan-500 px-4 py-3 font-semibold text-slate-950 transition-colors hover:bg-cyan-400"
+            >
+              Continue to workspace
+            </button>
+          </div>
+        </div>
+      )}
       
       {showPrivacySettings && (
         <PrivacySettings
