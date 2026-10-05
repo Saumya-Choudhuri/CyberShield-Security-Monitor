@@ -117,7 +117,7 @@ export async function monitoredSignIn(
   const result = await client.auth.signInWithPassword(credentials);
 
   if (result.error) {
-    await reportAuthAttempt({
+    const failureReport = await reportAuthAttempt({
       endpoint,
       identifier,
       status: 'failure',
@@ -126,6 +126,10 @@ export async function monitoredSignIn(
         message: result.error.message,
       },
     });
+
+    if (failureReport?.blocked) {
+      throw new Error(failureReport.message || 'Your IP has been blocked after two failed login attempts.');
+    }
   } else if (result.data?.session) {
     await reportAuthAttempt({
       endpoint,

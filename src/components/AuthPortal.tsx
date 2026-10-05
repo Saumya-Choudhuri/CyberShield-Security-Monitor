@@ -66,15 +66,19 @@ export function AuthPortal({ onAuthenticated }: AuthPortalProps) {
   };
 
   const handleLogin = async () => {
-    const result = await monitoredSignIn(supabase, { email, password });
+    try {
+      const result = await monitoredSignIn(supabase, { email, password });
 
-    if (result.error) {
-      showMessage(result.error.message, 'error');
-      return;
+      if (result.error) {
+        showMessage(result.error.message, 'error');
+        return;
+      }
+
+      showMessage('Login successful. Opening the workspace.', 'success');
+      onAuthenticated?.();
+    } catch (error) {
+      showMessage(error instanceof Error ? error.message : 'Login could not be completed.', 'error');
     }
-
-    showMessage('Login successful. Opening the workspace.', 'success');
-    onAuthenticated?.();
   };
 
   const handleSignup = async () => {
