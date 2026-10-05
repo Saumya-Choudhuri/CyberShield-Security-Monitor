@@ -47,7 +47,6 @@ function App() {
               </div>
               <AuthPortal
                 onAuthenticated={() => setAccessMode('demo')}
-                onTryDemo={() => setAccessMode('demo')}
               />
             </div>
 

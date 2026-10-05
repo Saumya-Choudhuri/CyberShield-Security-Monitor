@@ -4,7 +4,6 @@ type TabKey = 'login' | 'signup';
 
 interface AuthPortalProps {
   onAuthenticated?: () => void;
-  onTryDemo?: () => void;
 }
 
 const tabConfig: Record<TabKey, string> = {
@@ -12,7 +11,7 @@ const tabConfig: Record<TabKey, string> = {
   signup: 'Sign Up',
 };
 
-export function AuthPortal({ onAuthenticated, onTryDemo }: AuthPortalProps) {
+export function AuthPortal({ onAuthenticated }: AuthPortalProps) {
   const [activeTab, setActiveTab] = useState<TabKey>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -221,15 +220,6 @@ export function AuthPortal({ onAuthenticated, onTryDemo }: AuthPortalProps) {
         </button>
       </form>
 
-      {onTryDemo && (
-        <button
-          type="button"
-          onClick={onTryDemo}
-          className="w-full mt-3 rounded-lg border border-cyan-400/40 bg-cyan-400/10 py-3 font-semibold text-cyan-200 transition-colors hover:bg-cyan-400/20"
-        >
-          Try the public demo
-        </button>
-      )}
     </section>
   );
 }
