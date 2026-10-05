@@ -24,11 +24,18 @@ export function useSecurityData() {
 
       console.log('📊 Making Supabase queries...');
 
-      const [threatsRes, blockedRes, todayThreatsRes, criticalRes] = await Promise.all([
-        supabase.from('threat_logs').select('*', { count: 'exact', head: true }),
-        supabase.from('blocked_ips').select('*', { count: 'exact', head: true }).eq('status', 'blocked'),
-        supabase.from('threat_logs').select('*', { count: 'exact', head: true }).gte('created_at', today.toISOString()),
-        supabase.from('threat_logs').select('*', { count: 'exact', head: true }).eq('severity', 'critical'),
+      const dashboardQueries = Promise.all([
+          supabase.from('threat_logs').select('*', { count: 'exact', head: true }),
+          supabase.from('blocked_ips').select('*', { count: 'exact', head: true }).eq('status', 'blocked'),
+          supabase.from('threat_logs').select('*', { count: 'exact', head: true }).gte('created_at', today.toISOString()),
+          supabase.from('threat_logs').select('*', { count: 'exact', head: true }).eq('severity', 'critical'),
+        ]);
+      const queryTimeout = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Security data request timed out')), 10000);
+      });
+      const [threatsRes, blockedRes, todayThreatsRes, criticalRes] = await Promise.race([
+        dashboardQueries,
+        queryTimeout,
       ]);
 
       console.log('✅ Query results:', {
