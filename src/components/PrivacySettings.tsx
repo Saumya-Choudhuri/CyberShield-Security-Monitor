@@ -86,7 +86,7 @@ export function PrivacySettings({ onClose, onDeleted, demoMode = false }: Privac
       <div className="bg-slate-800 rounded-lg p-8 max-w-md w-full mx-4">
         <div className="flex items-center gap-3 mb-6">
           <ShieldAlert className="w-6 h-6 text-cyan-300" />
-          <h2 className="text-2xl font-bold text-white">Privacy</h2>
+          <h2 className="text-2xl font-bold text-white">Delete my data</h2>
         </div>
 
         <div className="rounded-lg border border-slate-700 bg-slate-700/70 p-4 mb-6">

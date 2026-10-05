@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Shield, Activity, Lock, TrendingUp, Settings, LogOut, LayoutDashboard, SlidersHorizontal } from 'lucide-react';
+import { Shield, Activity, Lock, TrendingUp, Trash2, LogOut } from 'lucide-react';
 import { useSecurityData } from './hooks/useSecurityData';
 import { StatCard } from './components/StatCard';
 import { ThreatLogTable } from './components/ThreatLogTable';
@@ -13,7 +13,6 @@ import { AuthPortal } from './components/AuthPortal';
 
 function App() {
   const [accessMode, setAccessMode] = useState<'locked' | 'demo' | 'live'>('locked');
-  const [activeSection, setActiveSection] = useState<'dashboard' | 'admin'>('dashboard');
   const isDemoMode = accessMode === 'demo';
   const { stats, recentThreats, blockedIPs, loading, refetch, clearDemoData } = useSecurityData(isDemoMode);
   const [selectedThreat, setSelectedThreat] = useState<ThreatLog | null>(null);
@@ -34,8 +33,8 @@ function App() {
               onClick={() => setAccessMode('demo')}
               className="flex items-center gap-2 rounded-lg border border-cyan-300/40 bg-cyan-300/10 px-4 py-2 text-sm font-semibold text-cyan-100 transition-colors hover:bg-cyan-300/20"
             >
-              <Settings size={17} />
-              Open Admin
+              <Shield size={17} />
+              Open workspace
             </button>
           </nav>
 
@@ -57,8 +56,8 @@ function App() {
               <ol className="mt-6 space-y-6">
                 <li className="flex gap-4"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cyan-300 font-bold text-slate-950">1</span><span><strong className="block text-white">Enter the workspace</strong><span className="text-sm text-slate-400">Use Login, Sign up, or Open Admin. No real account is required.</span></span></li>
                 <li className="flex gap-4"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cyan-300 font-bold text-slate-950">2</span><span><strong className="block text-white">Review the overview</strong><span className="text-sm text-slate-400">See threat volume, critical events, activity, and a sample report.</span></span></li>
-                <li className="flex gap-4"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cyan-300 font-bold text-slate-950">3</span><span><strong className="block text-white">Open Admin</strong><span className="text-sm text-slate-400">Inspect threat logs, blocked IPs, and privacy controls in one place.</span></span></li>
-                <li className="flex gap-4"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cyan-300 font-bold text-slate-950">4</span><span><strong className="block text-white">Delete your data</strong><span className="text-sm text-slate-400">Open Admin, choose Privacy, and press Delete my data. Demo records are cleared safely.</span></span></li>
+                <li className="flex gap-4"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cyan-300 font-bold text-slate-950">3</span><span><strong className="block text-white">Explore the workspace</strong><span className="text-sm text-slate-400">Review activity, threat logs, blocked IPs, and reports together.</span></span></li>
+                <li className="flex gap-4"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cyan-300 font-bold text-slate-950">4</span><span><strong className="block text-white">Delete your data</strong><span className="text-sm text-slate-400">Use the Delete my data button at the top whenever you want to clear the demo records.</span></span></li>
               </ol>
               <div className="mt-8 rounded-lg border border-amber-300/20 bg-amber-300/10 p-4 text-sm text-amber-100">Demo mode uses reserved example IP addresses and never changes production data.</div>
             </aside>
@@ -97,20 +96,6 @@ function App() {
             </div>
             <div className="flex items-center gap-2">
             <button
-              onClick={() => setActiveSection('dashboard')}
-              className={`flex items-center gap-2 rounded px-3 py-2 font-semibold transition-colors ${activeSection === 'dashboard' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-slate-700'}`}
-            >
-              <LayoutDashboard size={18} />
-              <span className="hidden sm:inline">Dashboard</span>
-            </button>
-            <button
-              onClick={() => setActiveSection('admin')}
-              className={`flex items-center gap-2 rounded px-3 py-2 font-semibold transition-colors ${activeSection === 'admin' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-slate-700'}`}
-            >
-              <SlidersHorizontal size={18} />
-              <span className="hidden sm:inline">Admin</span>
-            </button>
-            <button
               onClick={() => setAccessMode('locked')}
               className="flex items-center gap-2 rounded bg-slate-700 px-3 py-2 font-semibold text-white transition-colors hover:bg-slate-600"
               title="Sign out"
@@ -118,16 +103,15 @@ function App() {
               <LogOut size={18} />
               <span className="hidden sm:inline">Exit</span>
             </button>
-            </div>
-            {/* Privacy controls live inside Admin so the dashboard stays focused. */}
-            {activeSection === 'admin' && <button
+            <button
               onClick={() => setShowPrivacySettings(true)}
-              className="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2 px-4 rounded transition-colors"
-              title="Privacy Settings - Delete all your data"
+              className="flex items-center gap-2 rounded bg-red-600 px-3 py-2 font-semibold text-white transition-colors hover:bg-red-700"
+              title="Delete my data"
             >
-              <Settings size={20} />
-              <span className="hidden sm:inline">Privacy</span>
-            </button>}
+              <Trash2 size={18} />
+              <span>Delete my data</span>
+            </button>
+            </div>
           </div>
         </div>
       </header>
@@ -137,12 +121,6 @@ function App() {
           <div className="mb-6 flex items-center justify-between rounded-lg border border-cyan-400/30 bg-cyan-400/10 px-4 py-3 text-sm text-cyan-100">
             <span><strong>Public demo mode:</strong> all records are fictional and actions are read-only.</span>
             <span className="rounded bg-cyan-400/20 px-2 py-1 text-xs font-semibold uppercase tracking-wide">Demo</span>
-          </div>
-        )}
-        {activeSection === 'admin' && (
-          <div className="mb-6 rounded-lg border border-slate-700 bg-slate-800/70 p-4 text-slate-300">
-            <h2 className="text-lg font-semibold text-white">Admin controls</h2>
-            <p className="mt-1 text-sm">Review security events, blocked addresses, reports, and privacy controls.</p>
           </div>
         )}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -181,9 +159,8 @@ function App() {
           </div>
         </div>
 
-        {activeSection === 'admin' && (
-          <>
-            <div className="mb-6">
+        <>
+          <div className="mb-6">
               <div className="flex space-x-4 border-b border-slate-700">
                 <button
                   onClick={() => setActiveTab('threats')}
@@ -206,15 +183,14 @@ function App() {
                   Blocked IPs
                 </button>
               </div>
-            </div>
+          </div>
 
-            {activeTab === 'threats' ? (
-              <ThreatLogTable threats={recentThreats} onSelect={setSelectedThreat} />
-            ) : (
-              <BlockedIPsTable blockedIPs={blockedIPs} onUpdate={refetch} readOnly={isDemoMode} />
-            )}
-          </>
-        )}
+          {activeTab === 'threats' ? (
+            <ThreatLogTable threats={recentThreats} onSelect={setSelectedThreat} />
+          ) : (
+            <BlockedIPsTable blockedIPs={blockedIPs} onUpdate={refetch} readOnly={isDemoMode} />
+          )}
+        </>
       </main>
 
       <ThreatDetailsModal threat={selectedThreat} onClose={() => setSelectedThreat(null)} />
