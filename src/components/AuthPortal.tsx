@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
+import { monitoredSignIn, reportAuthAttempt } from '../lib/securityMonitorClient';
+import { supabase } from '../lib/supabase';
 
 type TabKey = 'login' | 'signup';
-
-const demoEmail = 'demo@cybershield.test';
-const demoPassword = 'CyberShield123!';
 
 interface AuthPortalProps {
   onAuthenticated?: () => void;
@@ -67,13 +66,14 @@ export function AuthPortal({ onAuthenticated }: AuthPortalProps) {
   };
 
   const handleLogin = async () => {
-    if (email.trim().toLowerCase() !== demoEmail || password !== demoPassword) {
-      showMessage('Incorrect demo email or password. Use the demo credentials shown below.', 'error');
+    const result = await monitoredSignIn(supabase, { email, password });
+
+    if (result.error) {
+      showMessage(result.error.message, 'error');
       return;
     }
 
-    setAiAnalysis('Demo security check passed. No real account or credentials are used.');
-    showMessage('Demo login successful. Opening the workspace.', 'success');
+    showMessage('Login successful. Opening the workspace.', 'success');
     onAuthenticated?.();
   };
 
@@ -83,8 +83,27 @@ export function AuthPortal({ onAuthenticated }: AuthPortalProps) {
       return;
     }
 
-    showMessage('Demo account created. Opening the workspace.', 'success');
-    onAuthenticated?.();
+    const result = await supabase.auth.signUp({ email, password });
+
+    if (result.error) {
+      await reportAuthAttempt({
+        endpoint: '/auth/signup',
+        event: 'signup',
+        identifier: email,
+        status: 'failure',
+        metadata: { message: result.error.message },
+      });
+      showMessage(result.error.message, 'error');
+      return;
+    }
+
+    if (result.data.session) {
+      showMessage('Signup successful. Opening the workspace.', 'success');
+      onAuthenticated?.();
+      return;
+    }
+
+    showMessage('Signup successful. Check your email to confirm your account.', 'success');
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -168,12 +187,6 @@ export function AuthPortal({ onAuthenticated }: AuthPortalProps) {
             onChange={event => setPassword(event.target.value)}
           />
         </div>
-
-        {activeTab === 'login' && (
-          <p className="rounded-lg border border-cyan-400/20 bg-cyan-400/10 px-3 py-2 text-xs text-cyan-200">
-            Demo login: <strong>{demoEmail}</strong> / <strong>{demoPassword}</strong>
-          </p>
-        )}
 
         {activeTab === 'signup' && (
           <div>
