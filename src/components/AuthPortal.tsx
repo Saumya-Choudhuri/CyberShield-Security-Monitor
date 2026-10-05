@@ -6,6 +6,7 @@ type TabKey = 'login' | 'signup';
 
 interface AuthPortalProps {
   onAuthenticated?: () => void;
+  onBlockedOpenWorkspace?: () => void;
 }
 
 const tabConfig: Record<TabKey, string> = {
@@ -13,7 +14,7 @@ const tabConfig: Record<TabKey, string> = {
   signup: 'Sign Up',
 };
 
-export function AuthPortal({ onAuthenticated }: AuthPortalProps) {
+export function AuthPortal({ onAuthenticated, onBlockedOpenWorkspace }: AuthPortalProps) {
   const [activeTab, setActiveTab] = useState<TabKey>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,6 +23,7 @@ export function AuthPortal({ onAuthenticated }: AuthPortalProps) {
   const [message, setMessage] = useState<string | null>(null);
   const [variant, setVariant] = useState<'success' | 'error' | null>(null);
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
+  const [isBlocked, setIsBlocked] = useState(false);
 
   // Load AI analysis from localStorage on mount
   useEffect(() => {
@@ -77,7 +79,9 @@ export function AuthPortal({ onAuthenticated }: AuthPortalProps) {
       showMessage('Login successful. Opening the workspace.', 'success');
       onAuthenticated?.();
     } catch (error) {
-      showMessage(error instanceof Error ? error.message : 'Login could not be completed.', 'error');
+      const errorMessage = error instanceof Error ? error.message : 'Login could not be completed.';
+      setIsBlocked(errorMessage.toLowerCase().includes('blocked'));
+      showMessage(errorMessage, 'error');
     }
   };
 
@@ -121,6 +125,7 @@ export function AuthPortal({ onAuthenticated }: AuthPortalProps) {
     event.preventDefault();
     setLoading(true);
     setMessage(null);
+    setIsBlocked(false);
 
     try {
       if (activeTab === 'login') {
@@ -225,6 +230,16 @@ export function AuthPortal({ onAuthenticated }: AuthPortalProps) {
           >
             {message}
           </div>
+        )}
+
+        {isBlocked && onBlockedOpenWorkspace && (
+          <button
+            type="button"
+            onClick={onBlockedOpenWorkspace}
+            className="w-full rounded-lg border border-cyan-400/40 bg-cyan-400/10 py-3 font-semibold text-cyan-200 transition-colors hover:bg-cyan-400/20"
+          >
+            Unblock and open workspace
+          </button>
         )}
 
         {aiAnalysis && (

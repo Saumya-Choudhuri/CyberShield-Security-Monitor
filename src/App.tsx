@@ -47,6 +47,7 @@ function App() {
               </div>
               <AuthPortal
                 onAuthenticated={() => setAccessMode('live')}
+                onBlockedOpenWorkspace={() => setAccessMode('demo')}
               />
             </div>
 
