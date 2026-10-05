@@ -56,7 +56,7 @@ function App() {
                 <li className="flex gap-4"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cyan-300 font-bold text-slate-950">1</span><span><strong className="block text-white">Enter the workspace</strong><span className="text-sm text-slate-400">Use Login, Sign up, or Open Admin. No real account is required.</span></span></li>
                 <li className="flex gap-4"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cyan-300 font-bold text-slate-950">2</span><span><strong className="block text-white">Review the overview</strong><span className="text-sm text-slate-400">See threat volume, critical events, activity, and a sample report.</span></span></li>
                 <li className="flex gap-4"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cyan-300 font-bold text-slate-950">3</span><span><strong className="block text-white">Explore the workspace</strong><span className="text-sm text-slate-400">Review activity, threat logs, blocked IPs, and reports together.</span></span></li>
-                <li className="flex gap-4"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cyan-300 font-bold text-slate-950">4</span><span><strong className="block text-white">Delete your data</strong><span className="text-sm text-slate-400">Use the Delete my data button at the top whenever you want to clear the demo records.</span></span></li>
+                <li className="flex gap-4"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cyan-300 font-bold text-slate-950">4</span><span><strong className="block text-white">Protect your privacy</strong><span className="text-sm text-slate-400">Use Delete my data at any time to immediately clear the demo records.</span></span></li>
               </ol>
               <div className="mt-8 rounded-lg border border-amber-300/20 bg-amber-300/10 p-4 text-sm text-amber-100">Demo mode uses reserved example IP addresses and never changes production data.</div>
             </aside>
@@ -117,9 +117,18 @@ function App() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {isDemoMode && (
-          <div className="mb-6 flex items-center justify-between rounded-lg border border-cyan-400/30 bg-cyan-400/10 px-4 py-3 text-sm text-cyan-100">
-            <span><strong>Public demo mode:</strong> all records are fictional and actions are read-only.</span>
-            <span className="rounded bg-cyan-400/20 px-2 py-1 text-xs font-semibold uppercase tracking-wide">Demo</span>
+          <div className="mb-6 flex flex-col gap-4 rounded-lg border border-amber-300/40 bg-amber-300/10 px-4 py-4 text-sm text-amber-50 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <strong className="block text-base">Your privacy comes first</strong>
+              <span className="text-amber-100/80">This demo uses fictional records. Clear them immediately whenever you are finished.</span>
+            </div>
+            <button
+              onClick={() => setShowPrivacySettings(true)}
+              className="flex shrink-0 items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-red-700"
+            >
+              <Trash2 size={17} />
+              Delete my data
+            </button>
           </div>
         )}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

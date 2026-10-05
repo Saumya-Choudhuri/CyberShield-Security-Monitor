@@ -90,7 +90,11 @@ export function PrivacySettings({ onClose, onDeleted, demoMode = false }: Privac
         </div>
 
         <div className="rounded-lg border border-slate-700 bg-slate-700/70 p-4 mb-6">
-          <p className="text-gray-200 text-sm">Delete the activity connected to your IP address.</p>
+          <p className="text-gray-200 text-sm">
+            {demoMode
+              ? 'Clear all fictional demo activity now so nobody can reuse the records on this screen.'
+              : 'Delete the activity connected to your IP address.'}
+          </p>
           <ul className="mt-3 space-y-1 text-xs text-gray-400">
             <li>Threat logs and activity history</li>
             <li>Blocked IP records</li>
