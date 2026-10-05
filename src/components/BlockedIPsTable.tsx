@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 interface BlockedIPsTableProps {
   blockedIPs: BlockedIP[];
   onUpdate: () => void;
+  readOnly?: boolean;
 }
 
 const statusConfig = {
@@ -13,7 +14,7 @@ const statusConfig = {
   approved: { color: '#10B981', icon: CheckCircle, label: 'Approved', bg: '#D1FAE5' },
 };
 
-export function BlockedIPsTable({ blockedIPs, onUpdate }: BlockedIPsTableProps) {
+export function BlockedIPsTable({ blockedIPs, onUpdate, readOnly = false }: BlockedIPsTableProps) {
   const handleApprove = async (ip: BlockedIP) => {
     try {
       await supabase
@@ -103,13 +104,16 @@ export function BlockedIPsTable({ blockedIPs, onUpdate }: BlockedIPsTableProps) 
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      {ip.status === 'blocked' && (
+                      {ip.status === 'blocked' && !readOnly && (
                         <button
                           onClick={() => handleApprove(ip)}
                           className="text-blue-600 hover:text-blue-800 font-medium"
                         >
                           Approve Unblock
                         </button>
+                      )}
+                      {ip.status === 'blocked' && readOnly && (
+                        <span className="text-cyan-600">Demo preview</span>
                       )}
                       {ip.status === 'approved' && (
                         <span className="text-green-600">Unblocked</span>

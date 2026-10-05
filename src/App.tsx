@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Shield, Activity, Lock, TrendingUp, Settings } from 'lucide-react';
+import { Shield, Activity, Lock, TrendingUp, Settings, LogOut, LayoutDashboard, SlidersHorizontal } from 'lucide-react';
 import { useSecurityData } from './hooks/useSecurityData';
 import { StatCard } from './components/StatCard';
 import { ThreatLogTable } from './components/ThreatLogTable';
@@ -12,10 +12,34 @@ import { ThreatLog } from './types/security';
 import { AuthPortal } from './components/AuthPortal';
 
 function App() {
-  const { stats, recentThreats, blockedIPs, loading, refetch } = useSecurityData();
+  const [accessMode, setAccessMode] = useState<'locked' | 'demo' | 'live'>('locked');
+  const [activeSection, setActiveSection] = useState<'dashboard' | 'admin'>('dashboard');
+  const isDemoMode = accessMode === 'demo';
+  const { stats, recentThreats, blockedIPs, loading, refetch, clearDemoData } = useSecurityData(isDemoMode);
   const [selectedThreat, setSelectedThreat] = useState<ThreatLog | null>(null);
   const [activeTab, setActiveTab] = useState<'threats' | 'blocked'>('threats');
   const [showPrivacySettings, setShowPrivacySettings] = useState(false);
+
+  if (accessMode === 'locked') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950 px-4 py-12">
+        <div className="mx-auto max-w-xl pt-8">
+          <div className="mb-8 text-center">
+            <div className="mb-4 inline-flex rounded-2xl bg-cyan-400/10 p-4 text-cyan-300">
+              <Shield size={38} />
+            </div>
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-300">CyberShield</p>
+            <h1 className="mt-3 text-4xl font-bold text-white">Security operations, made visible.</h1>
+            <p className="mt-3 text-slate-400">Sign in to your workspace or explore a safe read-only product demo.</p>
+          </div>
+          <AuthPortal
+            onAuthenticated={() => setAccessMode('live')}
+            onTryDemo={() => setAccessMode('demo')}
+          />
+        </div>
+      </div>
+    );
+  }
 
   // Debug info
   console.log('🚀 App component rendered');
@@ -44,20 +68,56 @@ function App() {
                 <p className="text-gray-400 mt-1">Real-time threat detection and automated protection</p>
               </div>
             </div>
+            <div className="flex items-center gap-2">
             <button
+              onClick={() => setActiveSection('dashboard')}
+              className={`flex items-center gap-2 rounded px-3 py-2 font-semibold transition-colors ${activeSection === 'dashboard' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-slate-700'}`}
+            >
+              <LayoutDashboard size={18} />
+              <span className="hidden sm:inline">Dashboard</span>
+            </button>
+            <button
+              onClick={() => setActiveSection('admin')}
+              className={`flex items-center gap-2 rounded px-3 py-2 font-semibold transition-colors ${activeSection === 'admin' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-slate-700'}`}
+            >
+              <SlidersHorizontal size={18} />
+              <span className="hidden sm:inline">Admin</span>
+            </button>
+            <button
+              onClick={() => setAccessMode('locked')}
+              className="flex items-center gap-2 rounded bg-slate-700 px-3 py-2 font-semibold text-white transition-colors hover:bg-slate-600"
+              title="Sign out"
+            >
+              <LogOut size={18} />
+              <span className="hidden sm:inline">Exit</span>
+            </button>
+            </div>
+            {/* Privacy controls live inside Admin so the dashboard stays focused. */}
+            {activeSection === 'admin' && <button
               onClick={() => setShowPrivacySettings(true)}
               className="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2 px-4 rounded transition-colors"
               title="Privacy Settings - Delete all your data"
             >
               <Settings size={20} />
               <span className="hidden sm:inline">Privacy</span>
-            </button>
+            </button>}
           </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <AuthPortal />
+        {isDemoMode && (
+          <div className="mb-6 flex items-center justify-between rounded-lg border border-cyan-400/30 bg-cyan-400/10 px-4 py-3 text-sm text-cyan-100">
+            <span><strong>Public demo mode:</strong> all records are fictional and actions are read-only.</span>
+            <span className="rounded bg-cyan-400/20 px-2 py-1 text-xs font-semibold uppercase tracking-wide">Demo</span>
+          </div>
+        )}
+        {activeSection === 'admin' && (
+          <div className="mb-6 rounded-lg border border-slate-700 bg-slate-800/70 p-4 text-slate-300">
+            <h2 className="text-lg font-semibold text-white">Admin controls</h2>
+            <p className="mt-1 text-sm">Review security events, blocked addresses, reports, and privacy controls.</p>
+          </div>
+        )}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatCard
             title="Total Threats Detected"
@@ -94,35 +154,39 @@ function App() {
           </div>
         </div>
 
-        <div className="mb-6">
-          <div className="flex space-x-4 border-b border-slate-700">
-            <button
-              onClick={() => setActiveTab('threats')}
-              className={`px-6 py-3 font-medium transition-colors ${
-                activeTab === 'threats'
-                  ? 'text-blue-500 border-b-2 border-blue-500'
-                  : 'text-gray-400 hover:text-gray-300'
-              }`}
-            >
-              Threat Logs
-            </button>
-            <button
-              onClick={() => setActiveTab('blocked')}
-              className={`px-6 py-3 font-medium transition-colors ${
-                activeTab === 'blocked'
-                  ? 'text-blue-500 border-b-2 border-blue-500'
-                  : 'text-gray-400 hover:text-gray-300'
-              }`}
-            >
-              Blocked IPs
-            </button>
-          </div>
-        </div>
+        {activeSection === 'admin' && (
+          <>
+            <div className="mb-6">
+              <div className="flex space-x-4 border-b border-slate-700">
+                <button
+                  onClick={() => setActiveTab('threats')}
+                  className={`px-6 py-3 font-medium transition-colors ${
+                    activeTab === 'threats'
+                      ? 'text-blue-500 border-b-2 border-blue-500'
+                      : 'text-gray-400 hover:text-gray-300'
+                  }`}
+                >
+                  Threat Logs
+                </button>
+                <button
+                  onClick={() => setActiveTab('blocked')}
+                  className={`px-6 py-3 font-medium transition-colors ${
+                    activeTab === 'blocked'
+                      ? 'text-blue-500 border-b-2 border-blue-500'
+                      : 'text-gray-400 hover:text-gray-300'
+                  }`}
+                >
+                  Blocked IPs
+                </button>
+              </div>
+            </div>
 
-        {activeTab === 'threats' ? (
-          <ThreatLogTable threats={recentThreats} onSelect={setSelectedThreat} />
-        ) : (
-          <BlockedIPsTable blockedIPs={blockedIPs} onUpdate={refetch} />
+            {activeTab === 'threats' ? (
+              <ThreatLogTable threats={recentThreats} onSelect={setSelectedThreat} />
+            ) : (
+              <BlockedIPsTable blockedIPs={blockedIPs} onUpdate={refetch} readOnly={isDemoMode} />
+            )}
+          </>
         )}
       </main>
 
@@ -131,7 +195,8 @@ function App() {
       {showPrivacySettings && (
         <PrivacySettings
           onClose={() => setShowPrivacySettings(false)}
-          onDeleted={refetch}
+          onDeleted={isDemoMode ? clearDemoData : refetch}
+          demoMode={isDemoMode}
         />
       )}
 

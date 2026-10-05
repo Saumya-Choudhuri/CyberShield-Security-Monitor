@@ -5,12 +5,17 @@ import { supabase } from '../lib/supabase';
 
 type TabKey = 'login' | 'signup';
 
+interface AuthPortalProps {
+  onAuthenticated?: () => void;
+  onTryDemo?: () => void;
+}
+
 const tabConfig: Record<TabKey, string> = {
   login: 'Login',
   signup: 'Sign Up',
 };
 
-export function AuthPortal() {
+export function AuthPortal({ onAuthenticated, onTryDemo }: AuthPortalProps) {
   const [activeTab, setActiveTab] = useState<TabKey>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -105,6 +110,7 @@ export function AuthPortal() {
 
       showMessage('Login successful—session created.', 'success');
       clearAIAnalysis(); // Clear AI analysis on successful login
+      onAuthenticated?.();
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Login blocked by CyberShield.';
       showMessage(message, 'error');
@@ -275,6 +281,16 @@ export function AuthPortal() {
           )}
         </button>
       </form>
+
+      {onTryDemo && (
+        <button
+          type="button"
+          onClick={onTryDemo}
+          className="w-full mt-3 rounded-lg border border-cyan-400/40 bg-cyan-400/10 py-3 font-semibold text-cyan-200 transition-colors hover:bg-cyan-400/20"
+        >
+          Try the public demo
+        </button>
+      )}
     </section>
   );
 }

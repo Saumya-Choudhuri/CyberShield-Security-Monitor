@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { ThreatLog, BlockedIP, DashboardStats } from '../types/security';
+import { demoBlockedIPs, demoStats, demoThreats } from '../lib/demoData';
 
-export function useSecurityData() {
+export function useSecurityData(demoMode = false) {
   const [stats, setStats] = useState<DashboardStats>({
     totalThreats: 0,
     blockedIPs: 0,
@@ -12,8 +13,17 @@ export function useSecurityData() {
   const [recentThreats, setRecentThreats] = useState<ThreatLog[]>([]);
   const [blockedIPs, setBlockedIPs] = useState<BlockedIP[]>([]);
   const [loading, setLoading] = useState(true);
+  const [demoCleared, setDemoCleared] = useState(false);
 
   const fetchData = useCallback(async () => {
+    if (demoMode) {
+      setStats(demoCleared ? { totalThreats: 0, blockedIPs: 0, threatsToday: 0, criticalThreats: 0 } : demoStats);
+      setRecentThreats(demoCleared ? [] : demoThreats);
+      setBlockedIPs(demoCleared ? [] : demoBlockedIPs);
+      setLoading(false);
+      return;
+    }
+
     console.log('🔍 Fetching security data...');
     console.log('Supabase URL:', import.meta.env.VITE_SUPABASE_URL);
     console.log('Supabase Key exists:', !!import.meta.env.VITE_SUPABASE_ANON_KEY);
@@ -86,10 +96,14 @@ export function useSecurityData() {
       console.log('🏁 Setting loading to false');
       setLoading(false);
     }
-  }, []);
+  }, [demoCleared, demoMode]);
 
   useEffect(() => {
     fetchData();
+
+    if (demoMode) {
+      return;
+    }
 
     const threatChannel = supabase
       .channel('threat_logs_changes')
@@ -108,7 +122,14 @@ export function useSecurityData() {
       supabase.removeChannel(threatChannel);
       supabase.removeChannel(blockedChannel);
     };
-  }, [fetchData]);
+  }, [demoMode, fetchData]);
 
-  return { stats, recentThreats, blockedIPs, loading, refetch: fetchData };
+  const clearDemoData = useCallback(() => {
+    setDemoCleared(true);
+    setStats({ totalThreats: 0, blockedIPs: 0, threatsToday: 0, criticalThreats: 0 });
+    setRecentThreats([]);
+    setBlockedIPs([]);
+  }, []);
+
+  return { stats, recentThreats, blockedIPs, loading, refetch: fetchData, clearDemoData };
 }

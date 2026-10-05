@@ -4,9 +4,10 @@ import { AlertTriangle, Trash2 } from 'lucide-react';
 interface PrivacySettingsProps {
   onClose: () => void;
   onDeleted: () => void;
+  demoMode?: boolean;
 }
 
-export function PrivacySettings({ onClose, onDeleted }: PrivacySettingsProps) {
+export function PrivacySettings({ onClose, onDeleted, demoMode = false }: PrivacySettingsProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -22,6 +23,14 @@ export function PrivacySettings({ onClose, onDeleted }: PrivacySettingsProps) {
     setMessage(null);
 
     try {
+      if (demoMode) {
+        onDeleted();
+        setMessage('Demo data cleared. No real records were changed.');
+        setMessageType('success');
+        setShowConfirm(false);
+        return;
+      }
+
       // First, get the user's actual IP from their browser
       const ipResponse = await fetch('https://api.ipify.org?format=json');
       const ipData = await ipResponse.json();
