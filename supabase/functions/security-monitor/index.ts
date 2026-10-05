@@ -34,7 +34,7 @@ interface ThreatResult {
 }
 
 const FAILED_LOGIN_WINDOW_MINUTES = 15;
-const FAILED_LOGIN_THRESHOLD = 5;
+const FAILED_LOGIN_THRESHOLD = 2;
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {

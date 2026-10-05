@@ -43,10 +43,10 @@ function App() {
               <div className="mb-8">
                 <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-300">Public product demo</p>
                 <h1 className="mt-3 text-4xl font-bold text-white sm:text-5xl">See every threat at a glance.</h1>
-                <p className="mt-4 max-w-xl text-lg leading-8 text-slate-400">Use any details to try the demo. Login and signup are simulated, and every record in the workspace is fictional.</p>
+                <p className="mt-4 max-w-xl text-lg leading-8 text-slate-400">Sign in with your real account to use live security data, or open the workspace directly to explore the fictional public demo.</p>
               </div>
               <AuthPortal
-                onAuthenticated={() => setAccessMode('demo')}
+                onAuthenticated={() => setAccessMode('live')}
               />
             </div>
 
