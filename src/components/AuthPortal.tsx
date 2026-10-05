@@ -1,7 +1,4 @@
 import { useState, useEffect } from 'react';
-import { monitoredSignIn, reportAuthAttempt } from '../lib/securityMonitorClient';
-import { performEnhancedSecurityCheck } from '../lib/enhancedSecurityMonitor';
-import { supabase } from '../lib/supabase';
 
 type TabKey = 'login' | 'signup';
 
@@ -68,53 +65,9 @@ export function AuthPortal({ onAuthenticated, onTryDemo }: AuthPortalProps) {
   };
 
   const handleLogin = async () => {
-    try {
-      // Get device info for AI analysis
-      const userAgent = navigator.userAgent;
-      const ip = await fetch('https://api.ipify.org?format=json')
-        .then((res) => res.json())
-        .then((data) => data.ip)
-        .catch(() => 'unknown');
-
-      // Perform AI-enhanced security check
-      const securityCheck = await performEnhancedSecurityCheck({
-        email,
-        ipAddress: ip,
-        failedAttempts: 0, // Would be tracked in real app
-        deviceInfo: {
-          userAgent,
-          browser: 'unknown',
-          os: 'unknown',
-        },
-      });
-
-      const analysisMessage = `AI Threat Analysis: ${securityCheck.riskLevel.toUpperCase()} (Risk Score: ${securityCheck.aiAnalysis.riskScore}%)`;
-      setAiAnalysis(analysisMessage);
-
-      // Check if AI recommends blocking
-      if (securityCheck.shouldBlock) {
-        showMessage(
-          `Login blocked: ${securityCheck.message}`,
-          'error',
-        );
-        return;
-      }
-
-      // Proceed with regular login if AI cleared it
-      const result = await monitoredSignIn(supabase, { email, password });
-
-      if (result.error) {
-        showMessage(result.error.message, 'error');
-        return;
-      }
-
-      showMessage('Login successful—session created.', 'success');
-      clearAIAnalysis(); // Clear AI analysis on successful login
-      onAuthenticated?.();
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Login blocked by CyberShield.';
-      showMessage(message, 'error');
-    }
+    setAiAnalysis('Demo security check passed. No real account or credentials are used.');
+    showMessage('Demo login successful. Opening the workspace.', 'success');
+    onAuthenticated?.();
   };
 
   const handleSignup = async () => {
@@ -123,22 +76,8 @@ export function AuthPortal({ onAuthenticated, onTryDemo }: AuthPortalProps) {
       return;
     }
 
-    const result = await supabase.auth.signUp({ email, password });
-
-    if (result.error) {
-      // Explicitly report signup failures to CyberShield
-      await reportAuthAttempt({
-        endpoint: '/auth/signup',
-        event: 'signup',
-        identifier: email,
-        status: 'failure',
-        metadata: { message: result.error.message },
-      });
-      showMessage(result.error.message, 'error');
-      return;
-    }
-
-    showMessage('Signup successful. Check your inbox to confirm email.', 'success');
+    showMessage('Demo account created. Opening the workspace.', 'success');
+    onAuthenticated?.();
   };
 
   const handleSubmit = async (event: React.FormEvent) => {

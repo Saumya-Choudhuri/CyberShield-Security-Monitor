@@ -23,19 +23,45 @@ function App() {
   if (accessMode === 'locked') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950 px-4 py-12">
-        <div className="mx-auto max-w-xl pt-8">
-          <div className="mb-8 text-center">
-            <div className="mb-4 inline-flex rounded-2xl bg-cyan-400/10 p-4 text-cyan-300">
-              <Shield size={38} />
+        <div className="mx-auto max-w-6xl">
+          <nav className="mb-12 flex items-center justify-between border-b border-white/10 pb-5">
+            <div className="flex items-center gap-3 text-white">
+              <Shield className="text-cyan-300" size={28} />
+              <span className="font-bold tracking-wide">CyberShield</span>
             </div>
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-300">CyberShield</p>
-            <h1 className="mt-3 text-4xl font-bold text-white">Security operations, made visible.</h1>
-            <p className="mt-3 text-slate-400">Sign in to your workspace or explore a safe read-only product demo.</p>
+            <button
+              type="button"
+              onClick={() => setAccessMode('demo')}
+              className="flex items-center gap-2 rounded-lg border border-cyan-300/40 bg-cyan-300/10 px-4 py-2 text-sm font-semibold text-cyan-100 transition-colors hover:bg-cyan-300/20"
+            >
+              <Settings size={17} />
+              Open Admin
+            </button>
+          </nav>
+
+          <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.85fr)]">
+            <div>
+              <div className="mb-8">
+                <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-300">Public product demo</p>
+                <h1 className="mt-3 text-4xl font-bold text-white sm:text-5xl">See every threat at a glance.</h1>
+                <p className="mt-4 max-w-xl text-lg leading-8 text-slate-400">Use any details to try the demo. Login and signup are simulated, and every record in the workspace is fictional.</p>
+              </div>
+              <AuthPortal
+                onAuthenticated={() => setAccessMode('demo')}
+                onTryDemo={() => setAccessMode('demo')}
+              />
+            </div>
+
+            <aside className="rounded-2xl border border-white/10 bg-white/[0.06] p-7 text-slate-200 shadow-2xl">
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-300">How it works</p>
+              <ol className="mt-6 space-y-6">
+                <li className="flex gap-4"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cyan-300 font-bold text-slate-950">1</span><span><strong className="block text-white">Enter the workspace</strong><span className="text-sm text-slate-400">Use Login, Sign up, or Open Admin. No real account is required.</span></span></li>
+                <li className="flex gap-4"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cyan-300 font-bold text-slate-950">2</span><span><strong className="block text-white">Review the overview</strong><span className="text-sm text-slate-400">See threat volume, critical events, activity, and a sample report.</span></span></li>
+                <li className="flex gap-4"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cyan-300 font-bold text-slate-950">3</span><span><strong className="block text-white">Open Admin</strong><span className="text-sm text-slate-400">Inspect threat logs, blocked IPs, and privacy controls in one place.</span></span></li>
+              </ol>
+              <div className="mt-8 rounded-lg border border-amber-300/20 bg-amber-300/10 p-4 text-sm text-amber-100">Demo mode uses reserved example IP addresses and never changes production data.</div>
+            </aside>
           </div>
-          <AuthPortal
-            onAuthenticated={() => setAccessMode('live')}
-            onTryDemo={() => setAccessMode('demo')}
-          />
         </div>
       </div>
     );
