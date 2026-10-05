@@ -4,6 +4,8 @@ import { supabase } from '../lib/supabase';
 
 type TabKey = 'login' | 'signup';
 
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 interface AuthPortalProps {
   onAuthenticated?: () => void;
   onBlockedOpenWorkspace?: () => void;
@@ -86,6 +88,11 @@ export function AuthPortal({ onAuthenticated, onBlockedOpenWorkspace }: AuthPort
   };
 
   const handleSignup = async () => {
+    if (!emailPattern.test(email.trim())) {
+      showMessage('Enter a valid email address.', 'error');
+      return;
+    }
+
     if (password !== confirmPassword) {
       showMessage('Passwords do not match.', 'error');
       return;
@@ -108,7 +115,13 @@ export function AuthPortal({ onAuthenticated, onBlockedOpenWorkspace }: AuthPort
         status: 'failure',
         metadata: { message: result.error.message },
       });
-      showMessage(result.error.message, 'error');
+      const alreadyRegistered = result.error.message.toLowerCase().includes('already registered');
+      showMessage(
+        alreadyRegistered
+          ? 'This email is already registered. Please switch to Login.'
+          : result.error.message,
+        'error',
+      );
       return;
     }
 
@@ -187,6 +200,11 @@ export function AuthPortal({ onAuthenticated, onBlockedOpenWorkspace }: AuthPort
             className="w-full rounded-lg border border-slate-600 bg-slate-900 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={email}
             onChange={event => setEmail(event.target.value)}
+            onBlur={() => {
+              if (activeTab === 'signup' && email && !emailPattern.test(email.trim())) {
+                showMessage('Enter a valid email address.', 'error');
+              }
+            }}
           />
         </div>
 
