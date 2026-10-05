@@ -46,6 +46,10 @@ npx supabase functions deploy delete-user-data
 
 ## Step 4: Verify Database Tables Exist
 
+In Supabase Dashboard, open **Authentication → URL Configuration** and add this redirect URL:
+
+`https://saumya-choudhuri.github.io/CyberShield-Security-Monitor/`
+
 Your Supabase project needs these tables (from migrations):
 - `threat_logs`
 - `blocked_ips`

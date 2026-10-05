@@ -83,7 +83,14 @@ export function AuthPortal({ onAuthenticated }: AuthPortalProps) {
       return;
     }
 
-    const result = await supabase.auth.signUp({ email, password });
+    const redirectUrl = new URL(import.meta.env.BASE_URL, window.location.origin).toString();
+    const result = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: redirectUrl,
+      },
+    });
 
     if (result.error) {
       await reportAuthAttempt({
