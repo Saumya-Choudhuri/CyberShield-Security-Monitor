@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { ThreatLog, BlockedIP, DashboardStats } from '../types/security';
-import { demoBlockedIPs, demoStats, demoThreats } from '../lib/demoData';
 
 export function useSecurityData(demoMode = false) {
   const [stats, setStats] = useState<DashboardStats>({
@@ -17,9 +16,9 @@ export function useSecurityData(demoMode = false) {
 
   const fetchData = useCallback(async () => {
     if (demoMode) {
-      setStats(demoCleared ? { totalThreats: 0, blockedIPs: 0, threatsToday: 0, criticalThreats: 0 } : demoStats);
-      setRecentThreats(demoCleared ? [] : demoThreats);
-      setBlockedIPs(demoCleared ? [] : demoBlockedIPs);
+      setStats({ totalThreats: 0, blockedIPs: 0, threatsToday: 0, criticalThreats: 0 });
+      setRecentThreats([]);
+      setBlockedIPs([]);
       setLoading(false);
       return;
     }

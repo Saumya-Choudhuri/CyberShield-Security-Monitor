@@ -44,7 +44,7 @@ function App() {
               <div className="mb-8">
                 <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-300">Public product demo</p>
                 <h1 className="mt-3 text-4xl font-bold text-white sm:text-5xl">See every threat at a glance.</h1>
-                <p className="mt-4 max-w-xl text-lg leading-8 text-slate-400">Sign in with your real account to use live security data, or open the workspace directly to explore the fictional public demo.</p>
+                <p className="mt-4 max-w-xl text-lg leading-8 text-slate-400">Sign in with your real account to use live security data, or open the workspace directly to inspect the empty public view.</p>
               </div>
               <AuthPortal
                 onAuthenticated={() => {
@@ -63,7 +63,7 @@ function App() {
                 <li className="flex gap-4"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cyan-300 font-bold text-slate-950">3</span><span><strong className="block text-white">Explore the workspace</strong><span className="text-sm text-slate-400">Review activity, threat logs, blocked IPs, and reports together.</span></span></li>
                 <li className="flex gap-4"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cyan-300 font-bold text-slate-950">4</span><span><strong className="block text-white">Protect your privacy</strong><span className="text-sm text-slate-400">Use Delete my data at any time to immediately clear the demo records.</span></span></li>
               </ol>
-              <div className="mt-8 rounded-lg border border-amber-300/20 bg-amber-300/10 p-4 text-sm text-amber-100">Demo mode uses reserved example IP addresses and never changes production data.</div>
+              <div className="mt-8 rounded-lg border border-amber-300/20 bg-amber-300/10 p-4 text-sm text-amber-100">The public view contains no fake numbers or IP addresses. Real security events appear only after live monitoring records them.</div>
             </aside>
           </div>
         </div>
@@ -125,7 +125,7 @@ function App() {
           <div className="mb-6 flex flex-col gap-4 rounded-lg border border-amber-300/40 bg-amber-300/10 px-4 py-4 text-sm text-amber-50 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <strong className="block text-base">Your privacy comes first</strong>
-              <span className="text-amber-100/80">This demo uses fictional records. Clear them immediately whenever you are finished.</span>
+              <span className="text-amber-100/80">The public view contains no fake records. Live events are cleared with this action.</span>
             </div>
             <button
               onClick={() => setShowPrivacySettings(true)}
