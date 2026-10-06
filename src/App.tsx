@@ -13,6 +13,7 @@ import { AuthPortal } from './components/AuthPortal';
 
 function App() {
   const [accessMode, setAccessMode] = useState<'locked' | 'demo' | 'live'>('locked');
+  const [blockedRecovery, setBlockedRecovery] = useState(false);
   const [showLoginInsight, setShowLoginInsight] = useState(false);
   const isDemoMode = accessMode === 'demo';
   const { stats, recentThreats, blockedIPs, loading, refetch, clearDemoData } = useSecurityData(isDemoMode);
@@ -48,10 +49,14 @@ function App() {
               </div>
               <AuthPortal
                 onAuthenticated={() => {
+                  setBlockedRecovery(false);
                   setAccessMode('live');
                   setShowLoginInsight(true);
                 }}
-                onBlockedOpenWorkspace={() => setAccessMode('demo')}
+                onBlockedOpenWorkspace={() => {
+                  setBlockedRecovery(true);
+                  setAccessMode('demo');
+                }}
               />
             </div>
 
@@ -100,7 +105,10 @@ function App() {
             </div>
             <div className="flex items-center gap-2">
             <button
-              onClick={() => setAccessMode('locked')}
+              onClick={() => {
+                setBlockedRecovery(false);
+                setAccessMode('locked');
+              }}
               className="flex items-center gap-2 rounded bg-slate-700 px-3 py-2 font-semibold text-white transition-colors hover:bg-slate-600"
               title="Sign out"
             >
@@ -240,8 +248,8 @@ function App() {
       {showPrivacySettings && (
         <PrivacySettings
           onClose={() => setShowPrivacySettings(false)}
-          onDeleted={isDemoMode ? clearDemoData : refetch}
-          demoMode={isDemoMode}
+          onDeleted={isDemoMode && !blockedRecovery ? clearDemoData : refetch}
+          demoMode={isDemoMode && !blockedRecovery}
         />
       )}
 
