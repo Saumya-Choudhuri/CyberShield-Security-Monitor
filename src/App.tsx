@@ -15,8 +15,9 @@ function App() {
   const [accessMode, setAccessMode] = useState<'locked' | 'demo' | 'live'>('locked');
   const [blockedRecovery, setBlockedRecovery] = useState(false);
   const [showLoginInsight, setShowLoginInsight] = useState(false);
-  const isDemoMode = accessMode === 'demo';
-  const { stats, recentThreats, blockedIPs, loading, refetch, clearDemoData } = useSecurityData(isDemoMode);
+  const isPublicDemo = accessMode === 'demo' && !blockedRecovery;
+  const hasRealWorkspaceData = accessMode === 'live' || blockedRecovery;
+  const { stats, recentThreats, blockedIPs, loading, refetch, clearDemoData } = useSecurityData(!hasRealWorkspaceData);
   const [selectedThreat, setSelectedThreat] = useState<ThreatLog | null>(null);
   const [activeTab, setActiveTab] = useState<'threats' | 'blocked'>('threats');
   const [showPrivacySettings, setShowPrivacySettings] = useState(false);
@@ -129,7 +130,7 @@ function App() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {isDemoMode && (
+        {isPublicDemo && (
           <div className="mb-6 flex flex-col gap-4 rounded-lg border border-amber-300/40 bg-amber-300/10 px-4 py-4 text-sm text-amber-50 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <strong className="block text-base">Your privacy comes first</strong>
@@ -209,7 +210,7 @@ function App() {
           {activeTab === 'threats' ? (
             <ThreatLogTable threats={recentThreats} onSelect={setSelectedThreat} />
           ) : (
-            <BlockedIPsTable blockedIPs={blockedIPs} onUpdate={refetch} readOnly={isDemoMode} />
+            <BlockedIPsTable blockedIPs={blockedIPs} onUpdate={refetch} readOnly={!hasRealWorkspaceData} />
           )}
         </>
       </main>
@@ -248,8 +249,8 @@ function App() {
       {showPrivacySettings && (
         <PrivacySettings
           onClose={() => setShowPrivacySettings(false)}
-          onDeleted={isDemoMode && !blockedRecovery ? clearDemoData : refetch}
-          demoMode={isDemoMode && !blockedRecovery}
+          onDeleted={isPublicDemo ? clearDemoData : refetch}
+          demoMode={isPublicDemo}
         />
       )}
 
