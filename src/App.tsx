@@ -14,6 +14,7 @@ import { AuthPortal } from './components/AuthPortal';
 function App() {
   const [accessMode, setAccessMode] = useState<'locked' | 'demo' | 'live'>('locked');
   const [blockedRecovery, setBlockedRecovery] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | undefined>();
   const [showLoginInsight, setShowLoginInsight] = useState(false);
   const isPublicDemo = accessMode === 'demo' && !blockedRecovery;
   const hasRealWorkspaceData = accessMode === 'live' || blockedRecovery;
@@ -49,12 +50,14 @@ function App() {
                 <p className="mt-4 max-w-xl text-lg leading-8 text-slate-400">Sign in with your real account to use live security data, or open the workspace directly to inspect the empty public view.</p>
               </div>
               <AuthPortal
-                onAuthenticated={() => {
+                onAuthenticated={(email) => {
+                  setUserEmail(email);
                   setBlockedRecovery(false);
                   setAccessMode('live');
                   setShowLoginInsight(true);
                 }}
-                onBlockedOpenWorkspace={() => {
+                onBlockedOpenWorkspace={(email) => {
+                  setUserEmail(email);
                   setBlockedRecovery(true);
                   setAccessMode('demo');
                 }}
@@ -251,6 +254,7 @@ function App() {
           onClose={() => setShowPrivacySettings(false)}
           onDeleted={isPublicDemo ? clearDemoData : refetch}
           demoMode={isPublicDemo}
+          userEmail={userEmail}
         />
       )}
 

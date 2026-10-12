@@ -5,9 +5,10 @@ interface PrivacySettingsProps {
   onClose: () => void;
   onDeleted: () => void;
   demoMode?: boolean;
+  userEmail?: string;
 }
 
-export function PrivacySettings({ onClose, onDeleted, demoMode = false }: PrivacySettingsProps) {
+export function PrivacySettings({ onClose, onDeleted, demoMode = false, userEmail }: PrivacySettingsProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -51,6 +52,7 @@ export function PrivacySettings({ onClose, onDeleted, demoMode = false }: Privac
         body: JSON.stringify({
           confirm_deletion: true,
           user_ip: userIp, // Send user's actual IP
+          user_email: userEmail,
         }),
       });
 

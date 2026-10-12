@@ -57,7 +57,28 @@ Deno.serve(async (req: Request) => {
       // Use IP from frontend if provided, otherwise fall back to header extraction
       let ipToDelete = body.user_ip || clientIp;
       console.log('🗑️ Using IP for deletion:', ipToDelete, '(from:', body.user_ip ? 'frontend' : 'headers', ')');
-      const ipsToDelete = [...new Set([ipToDelete, clientIp].filter(Boolean))];
+      const ipsToDeleteSet = new Set([ipToDelete, clientIp].filter(Boolean));
+      const userEmail = typeof body.user_email === 'string' ? body.user_email.trim() : '';
+
+      // A user may have logged in from more than one IP. Include every IP
+      // recorded for the signed-in email so deletion is complete across devices.
+      if (userEmail) {
+        const { data: userThreats, error: userThreatError } = await supabase
+          .from('threat_logs')
+          .select('ip_address')
+          .ilike('payload->authContext->>identifier', userEmail);
+
+        if (userThreatError) {
+          console.error('❌ Error finding user IPs:', userThreatError);
+        } else {
+          for (const threat of userThreats || []) {
+            ipsToDeleteSet.add(threat.ip_address);
+          }
+        }
+      }
+
+      const ipsToDelete = [...ipsToDeleteSet];
+      console.log('🗑️ IPs included in deletion:', ipsToDelete);
 
       let deletedCount = 0;
 

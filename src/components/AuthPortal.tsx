@@ -7,8 +7,8 @@ type TabKey = 'login' | 'signup';
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 interface AuthPortalProps {
-  onAuthenticated?: () => void;
-  onBlockedOpenWorkspace?: () => void;
+  onAuthenticated?: (email: string) => void;
+  onBlockedOpenWorkspace?: (email: string) => void;
 }
 
 const tabConfig: Record<TabKey, string> = {
@@ -79,7 +79,7 @@ export function AuthPortal({ onAuthenticated, onBlockedOpenWorkspace }: AuthPort
       }
 
       showMessage('Login successful. Opening the workspace.', 'success');
-      onAuthenticated?.();
+      onAuthenticated?.(email);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Login could not be completed.';
       setIsBlocked(errorMessage.toLowerCase().includes('blocked'));
@@ -127,7 +127,7 @@ export function AuthPortal({ onAuthenticated, onBlockedOpenWorkspace }: AuthPort
 
     if (result.data.session) {
       showMessage('Signup successful. Opening the workspace.', 'success');
-      onAuthenticated?.();
+      onAuthenticated?.(email);
       return;
     }
 
@@ -253,7 +253,7 @@ export function AuthPortal({ onAuthenticated, onBlockedOpenWorkspace }: AuthPort
         {isBlocked && onBlockedOpenWorkspace && (
           <button
             type="button"
-            onClick={onBlockedOpenWorkspace}
+            onClick={() => onBlockedOpenWorkspace(email)}
             className="w-full rounded-lg border border-cyan-400/40 bg-cyan-400/10 py-3 font-semibold text-cyan-200 transition-colors hover:bg-cyan-400/20"
           >
             Unblock and open workspace
